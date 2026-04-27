@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  boards    Board[]  @relation("UserBoards")
+  memberShips BoardMember[]
+}
+
+model Board {
+  id        String   @id @default(uuid())
+  title     String
+  ownerId   String
+  owner     User     @relation("UserBoards", fields: [ownerId], references: [id])
+  lists     List[]
+  members   BoardMember[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BoardMember {
+  id        String   @id @default(uuid())
+  boardId   String
+  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  role      Role     @default(MEMBER)
+  createdAt DateTime @default(now())
+
+  @@unique([boardId, userId])
+}
+
+enum Role {
+  OWNER
+  MEMBER
+}
+
+model List {
+  id        String   @id @default(uuid())
+  title     String
+  boardId   String
+  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  cards     Card[]
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Card {
+  id          String      @id @default(uuid())
+  title       String
+  description String?
+  listId      String
+  list        List        @relation(fields: [listId], references: [id], onDelete: Cascade)
+  position    Int        @default(0)
+  dueDate     DateTime?
+  priority    Priority   @default(medium)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+enum Priority {
+  low
+  medium
+  high
+  urgent
+}
