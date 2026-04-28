@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
+  id        Int      @id @default(autoincrement())
   email     String   @unique
   password  String
   name      String
@@ -19,9 +19,9 @@ model User {
 }
 
 model Board {
-  id        String   @id @default(uuid())
+  id        Int      @id @default(autoincrement())
   title     String
-  ownerId   String
+  ownerId   Int
   owner     User     @relation("UserBoards", fields: [ownerId], references: [id])
   lists     List[]
   members   BoardMember[]
@@ -30,10 +30,10 @@ model Board {
 }
 
 model BoardMember {
-  id        String   @id @default(uuid())
-  boardId   String
+  id        Int      @id @default(autoincrement())
+  boardId   Int
   board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
-  userId    String
+  userId    Int
   user      User     @relation(fields: [userId], references: [id])
   role      Role     @default(MEMBER)
   createdAt DateTime @default(now())
@@ -47,9 +47,9 @@ enum Role {
 }
 
 model List {
-  id        String   @id @default(uuid())
+  id        Int      @id @default(autoincrement())
   title     String
-  boardId   String
+  boardId   Int
   board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
   cards     Card[]
   position  Int      @default(0)
@@ -58,11 +58,11 @@ model List {
 }
 
 model Card {
-  id          String      @id @default(uuid())
+  id          Int       @id @default(autoincrement())
   title       String
   description String?
-  listId      String
-  list        List        @relation(fields: [listId], references: [id], onDelete: Cascade)
+  listId      Int
+  list        List     @relation(fields: [listId], references: [id], onDelete: Cascade)
   position    Int        @default(0)
   dueDate     DateTime?
   priority    Priority   @default(medium)
