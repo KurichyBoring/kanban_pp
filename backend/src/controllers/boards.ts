@@ -48,10 +48,16 @@ export const getBoard = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = (req as any).userId;
     const { id } = req.params;
+    const boardId = parseInt(id, 10);
+    
+    if (isNaN(boardId)) {
+      res.status(400).json({ error: 'Invalid board ID' });
+      return;
+    }
     
     const board = await prisma.board.findFirst({
       where: {
-        id,
+        id: boardId,
         OR: [{ ownerId: userId }, { members: { some: { userId } } }],
       },
       include: {
@@ -82,10 +88,17 @@ export const updateBoard = async (req: Request, res: Response): Promise<void> =>
   try {
     const userId = (req as any).userId;
     const { id } = req.params;
+    const boardId = parseInt(id, 10);
+    
+    if (isNaN(boardId)) {
+      res.status(400).json({ error: 'Invalid board ID' });
+      return;
+    }
+    
     const { title } = req.body;
     
     const board = await prisma.board.findFirst({
-      where: { id, ownerId: userId },
+      where: { id: boardId, ownerId: userId },
     });
     
     if (!board) {
@@ -94,7 +107,7 @@ export const updateBoard = async (req: Request, res: Response): Promise<void> =>
     }
     
     const updated = await prisma.board.update({
-      where: { id },
+      where: { id: boardId },
       data: { title },
     });
     
@@ -109,9 +122,15 @@ export const deleteBoard = async (req: Request, res: Response): Promise<void> =>
   try {
     const userId = (req as any).userId;
     const { id } = req.params;
+    const boardId = parseInt(id, 10);
+    
+    if (isNaN(boardId)) {
+      res.status(400).json({ error: 'Invalid board ID' });
+      return;
+    }
     
     const board = await prisma.board.findFirst({
-      where: { id, ownerId: userId },
+      where: { id: boardId, ownerId: userId },
     });
     
     if (!board) {
@@ -119,7 +138,7 @@ export const deleteBoard = async (req: Request, res: Response): Promise<void> =>
       return;
     }
     
-    await prisma.board.delete({ where: { id } });
+    await prisma.board.delete({ where: { id: boardId } });
     res.status(204).send();
   } catch (error) {
     console.error('DeleteBoard error:', error);
@@ -131,10 +150,16 @@ export const addMember = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = (req as any).userId;
     const { id } = req.params;
+    const boardId = parseInt(id, 10);
     const { email } = req.body;
     
+    if (isNaN(boardId)) {
+      res.status(400).json({ error: 'Invalid board ID' });
+      return;
+    }
+    
     const board = await prisma.board.findFirst({
-      where: { id, ownerId: userId },
+      where: { id: boardId, ownerId: userId },
     });
     
     if (!board) {
@@ -149,9 +174,9 @@ export const addMember = async (req: Request, res: Response): Promise<void> => {
     }
     
     await prisma.boardMember.upsert({
-      where: { boardId_userId: { boardId: id, userId: user.id } },
+      where: { boardId_userId: { boardId: boardId, userId: user.id } },
       update: {},
-      create: { boardId: id, userId: user.id, role: 'MEMBER' },
+      create: { boardId: boardId, userId: user.id, role: 'MEMBER' },
     });
     
     res.status(201).json({ message: 'Member added' });

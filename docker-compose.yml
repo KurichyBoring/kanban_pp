@@ -39,7 +39,7 @@ services:
       dockerfile: Dockerfile
     container_name: kanban-web
     environment:
-      VITE_API_URL: http://localhost:3001
+      VITE_API_URL: /api
     ports:
       - "5173:5173"
     depends_on:
